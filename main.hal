@@ -1,0 +1,396 @@
+# Created by Marius Alksnys
+# e-mail: marius@robotise.lt
+
+# loadrt lincurve
+# newinst lincurve curve_k1 pincount=10 NOTE: lincurve is buggy! 2017-02-11
+# newinst lincurve curve_k2 pincount=10
+# newinst lincurve curve_k3 pincount=10
+
+loadrt dxlincurve names=curve_k1,curve_k2,curve_k3 personality=10,10,10
+newthread thread 2000000000 fp
+# loadusr -W ./hal_atr620.py /dev/serial/by-path/pci-0000:00:06.0-usb-0:1:1.0-port0 1 2 3
+loadusr -W ./hal_atr620.py /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0 1 2 3
+
+newcomp ui_prog timer=2000
+newcomp ui_run timer=2000
+newcomp ui_mon timer=2000
+
+loadrt sampler depth=4,4,4 cfg=bfffff,bfffff,bfffff
+
+# Almost identical below vvv
+
+# === Kiln k1 ===
+loadusr -Wn store_k1 ./hal_store.py -n store_k1 -f k1store.ini -i 2
+newinst progtime progtime_k1
+newinst limit2 lim_k1
+
+addf progtime_k1 thread
+addf curve_k1 thread
+addf lim_k1 thread
+
+# UI remote component definition
+# waitexists ui_prog
+# waitbound ui_prog
+# sete 1 0.01
+newpin ui_prog ui_prog.k1_dx0 float io
+newpin ui_prog ui_prog.k1_dx1 float io
+newpin ui_prog ui_prog.k1_dx2 float io
+newpin ui_prog ui_prog.k1_dx3 float io
+newpin ui_prog ui_prog.k1_dx4 float io
+newpin ui_prog ui_prog.k1_dx5 float io
+newpin ui_prog ui_prog.k1_dx6 float io
+newpin ui_prog ui_prog.k1_dx7 float io
+newpin ui_prog ui_prog.k1_dx8 float io
+newpin ui_prog ui_prog.k1_dx9 float io
+
+newpin ui_prog ui_prog.k1_y1 float io
+newpin ui_prog ui_prog.k1_y2 float io
+newpin ui_prog ui_prog.k1_y3 float io
+newpin ui_prog ui_prog.k1_y4 float io
+newpin ui_prog ui_prog.k1_y5 float io
+newpin ui_prog ui_prog.k1_y6 float io
+newpin ui_prog ui_prog.k1_y7 float io
+newpin ui_prog ui_prog.k1_y8 float io
+newpin ui_prog ui_prog.k1_y9 float io
+newpin ui_prog ui_prog.k1_y10 float io
+
+newpin ui_prog ui_prog.k1_program u32 io
+newpin ui_prog ui_prog.k1_actual_program u32 in
+newpin ui_prog ui_prog.k1_runs bit in
+
+newpin ui_run ui_run.k1_comm_ok bit in
+newpin ui_run ui_run.k1_program u32 io
+newpin ui_run ui_run.k1_start bit out
+newpin ui_run ui_run.k1_runs bit in
+newpin ui_run ui_run.k1_stay bit out
+newpin ui_run ui_run.k1_stop bit out
+newpin ui_run ui_run.k1_waiting bit in
+newpin ui_run ui_run.k1_sp float in
+newpin ui_run ui_run.k1_pv1 float in
+newpin ui_run ui_run.k1_pv2 float in
+newpin ui_run ui_run.k1_elapsed float io
+newpin ui_run ui_run.k1_duration float in
+
+newpin ui_mon ui_mon.k1_comm_ok bit in
+newpin ui_mon ui_mon.k1_runs bit in
+newpin ui_mon ui_mon.k1_pv1 float in
+newpin ui_mon ui_mon.k1_pv2 float in
+newpin ui_mon ui_mon.k1_sp float in
+newpin ui_mon ui_mon.k1_op1 float in
+newpin ui_mon ui_mon.k1_op2 float in
+newpin ui_mon ui_mon.k1_elapsed float in
+newpin ui_mon ui_mon.k1_duration float in
+
+net k1.dx0 store_k1.dx0 ui_prog.k1_dx0 curve_k1.dx-00
+net k1.dx1 store_k1.dx1 ui_prog.k1_dx1 curve_k1.dx-01
+net k1.dx2 store_k1.dx2 ui_prog.k1_dx2 curve_k1.dx-02
+net k1.dx3 store_k1.dx3 ui_prog.k1_dx3 curve_k1.dx-03
+net k1.dx4 store_k1.dx4 ui_prog.k1_dx4 curve_k1.dx-04
+net k1.dx5 store_k1.dx5 ui_prog.k1_dx5 curve_k1.dx-05
+net k1.dx6 store_k1.dx6 ui_prog.k1_dx6 curve_k1.dx-06
+net k1.dx7 store_k1.dx7 ui_prog.k1_dx7 curve_k1.dx-07
+net k1.dx8 store_k1.dx8 ui_prog.k1_dx8 curve_k1.dx-08
+net k1.dx9 store_k1.dx9 ui_prog.k1_dx9 curve_k1.dx-09
+
+net k1.duration curve_k1.x-max => progtime_k1.duration ui_mon.k1_duration ui_run.k1_duration
+
+net k1.y00 progtime_k1.pv-at-start curve_k1.y-00
+net k1.y01 store_k1.y1 ui_prog.k1_y1 curve_k1.y-01
+net k1.y02 store_k1.y2 ui_prog.k1_y2 curve_k1.y-02
+net k1.y03 store_k1.y3 ui_prog.k1_y3 curve_k1.y-03
+net k1.y04 store_k1.y4 ui_prog.k1_y4 curve_k1.y-04
+net k1.y05 store_k1.y5 ui_prog.k1_y5 curve_k1.y-05
+net k1.y06 store_k1.y6 ui_prog.k1_y6 curve_k1.y-06
+net k1.y07 store_k1.y7 ui_prog.k1_y7 curve_k1.y-07
+net k1.y08 store_k1.y8 ui_prog.k1_y8 curve_k1.y-08
+net k1.y09 store_k1.y9 ui_prog.k1_y9 curve_k1.y-09
+net k1.y10 store_k1.y10 ui_prog.k1_y10 curve_k1.y-10
+
+net k1.program store_k1.program ui_prog.k1_program ui_run.k1_program
+net k1.actual_program store_k1.actual_program => ui_prog.k1_actual_program
+setp progtime_k1.scale 0.000277777777778
+net k1.time progtime_k1.elapsed curve_k1.in ui_mon.k1_elapsed ui_run.k1_elapsed
+net k1.sp-raw curve_k1.out => progtime_k1.cmd-in
+net k1.sp-lim progtime_k1.cmd-out => lim_k1.in
+net k1.max-diff progtime_k1.max-diff
+net k1.max-ferr progtime_k1.max-ferr
+sets k1.max-diff 50
+sets k1.max-ferr 3
+setp lim_k1.min 0
+setp lim_k1.max 1100
+# setp lim_k1.maxv 1000
+
+net k1.start ui_run.k1_start => progtime_k1.start
+net k1.run progtime_k1.runs => hal_atr620.k1.run ui_run.k1_runs ui_mon.k1_runs ui_prog.k1_runs
+net k1.stay ui_run.k1_stay => progtime_k1.stay
+net k1.stop ui_run.k1_stop => progtime_k1.stop
+net k1.waiting progtime_k1.waiting => ui_run.k1_waiting
+
+net k1.ok hal_atr620.k1.ok => ui_mon.k1_comm_ok ui_run.k1_comm_ok
+net k1.pv1 hal_atr620.k1.pv1 => progtime_k1.pv1 ui_mon.k1_pv1 ui_run.k1_pv1
+net k1.pv2 hal_atr620.k1.pv2 => progtime_k1.pv2 ui_mon.k1_pv2 ui_run.k1_pv2
+net k1.op1 hal_atr620.k1.op1 => ui_mon.k1_op1
+net k1.op2 hal_atr620.k1.op2 => ui_mon.k1_op2
+net k1.ser-sp lim_k1.out => hal_atr620.k1.ser-sp ui_run.k1_sp ui_mon.k1_sp
+
+loadusr -Wn halsampler_k1 halsampler -N halsampler_k1 -c 0 -t k1_samples.csv
+net k1.run sampler.0.enable
+net k1.ok sampler.0.pin.0
+net k1.pv1 sampler.0.pin.1
+net k1.pv2 sampler.0.pin.2
+net k1.op1 sampler.0.pin.3
+net k1.op2 sampler.0.pin.4
+net k1.ser-sp sampler.0.pin.5
+addf sampler.0 thread
+
+# === Kiln k2 ===
+loadusr -Wn store_k2 ./hal_store.py -n store_k2 -f k2store.ini -i 10
+newinst progtime progtime_k2
+newinst limit2 lim_k2
+
+addf progtime_k2 thread
+addf curve_k2 thread
+addf lim_k2 thread
+
+newpin ui_prog ui_prog.k2_dx0 float io
+newpin ui_prog ui_prog.k2_dx1 float io
+newpin ui_prog ui_prog.k2_dx2 float io
+newpin ui_prog ui_prog.k2_dx3 float io
+newpin ui_prog ui_prog.k2_dx4 float io
+newpin ui_prog ui_prog.k2_dx5 float io
+newpin ui_prog ui_prog.k2_dx6 float io
+newpin ui_prog ui_prog.k2_dx7 float io
+newpin ui_prog ui_prog.k2_dx8 float io
+newpin ui_prog ui_prog.k2_dx9 float io
+
+newpin ui_prog ui_prog.k2_y1 float io
+newpin ui_prog ui_prog.k2_y2 float io
+newpin ui_prog ui_prog.k2_y3 float io
+newpin ui_prog ui_prog.k2_y4 float io
+newpin ui_prog ui_prog.k2_y5 float io
+newpin ui_prog ui_prog.k2_y6 float io
+newpin ui_prog ui_prog.k2_y7 float io
+newpin ui_prog ui_prog.k2_y8 float io
+newpin ui_prog ui_prog.k2_y9 float io
+newpin ui_prog ui_prog.k2_y10 float io
+
+newpin ui_prog ui_prog.k2_program u32 io
+newpin ui_prog ui_prog.k2_actual_program u32 in
+newpin ui_prog ui_prog.k2_runs bit in
+
+newpin ui_run ui_run.k2_comm_ok bit in
+newpin ui_run ui_run.k2_program u32 io
+newpin ui_run ui_run.k2_start bit out
+newpin ui_run ui_run.k2_runs bit in
+newpin ui_run ui_run.k2_stay bit out
+newpin ui_run ui_run.k2_stop bit out
+newpin ui_run ui_run.k2_waiting bit in
+newpin ui_run ui_run.k2_sp float in
+newpin ui_run ui_run.k2_pv1 float in
+newpin ui_run ui_run.k2_pv2 float in
+newpin ui_run ui_run.k2_elapsed float io
+newpin ui_run ui_run.k2_duration float in
+
+newpin ui_mon ui_mon.k2_comm_ok bit in
+newpin ui_mon ui_mon.k2_runs bit in
+newpin ui_mon ui_mon.k2_pv1 float in
+newpin ui_mon ui_mon.k2_pv2 float in
+newpin ui_mon ui_mon.k2_sp float in
+newpin ui_mon ui_mon.k2_op1 float in
+newpin ui_mon ui_mon.k2_op2 float in
+newpin ui_mon ui_mon.k2_elapsed float in
+newpin ui_mon ui_mon.k2_duration float in
+
+net k2.dx0 store_k2.dx0 ui_prog.k2_dx0 curve_k2.dx-00
+net k2.dx1 store_k2.dx1 ui_prog.k2_dx1 curve_k2.dx-01
+net k2.dx2 store_k2.dx2 ui_prog.k2_dx2 curve_k2.dx-02
+net k2.dx3 store_k2.dx3 ui_prog.k2_dx3 curve_k2.dx-03
+net k2.dx4 store_k2.dx4 ui_prog.k2_dx4 curve_k2.dx-04
+net k2.dx5 store_k2.dx5 ui_prog.k2_dx5 curve_k2.dx-05
+net k2.dx6 store_k2.dx6 ui_prog.k2_dx6 curve_k2.dx-06
+net k2.dx7 store_k2.dx7 ui_prog.k2_dx7 curve_k2.dx-07
+net k2.dx8 store_k2.dx8 ui_prog.k2_dx8 curve_k2.dx-08
+net k2.dx9 store_k2.dx9 ui_prog.k2_dx9 curve_k2.dx-09
+
+net k2.duration curve_k2.x-max => progtime_k2.duration ui_mon.k2_duration ui_run.k2_duration
+
+net k2.y00 progtime_k2.pv-at-start curve_k2.y-00
+net k2.y01 store_k2.y1 ui_prog.k2_y1 curve_k2.y-01
+net k2.y02 store_k2.y2 ui_prog.k2_y2 curve_k2.y-02
+net k2.y03 store_k2.y3 ui_prog.k2_y3 curve_k2.y-03
+net k2.y04 store_k2.y4 ui_prog.k2_y4 curve_k2.y-04
+net k2.y05 store_k2.y5 ui_prog.k2_y5 curve_k2.y-05
+net k2.y06 store_k2.y6 ui_prog.k2_y6 curve_k2.y-06
+net k2.y07 store_k2.y7 ui_prog.k2_y7 curve_k2.y-07
+net k2.y08 store_k2.y8 ui_prog.k2_y8 curve_k2.y-08
+net k2.y09 store_k2.y9 ui_prog.k2_y9 curve_k2.y-09
+net k2.y10 store_k2.y10 ui_prog.k2_y10 curve_k2.y-10
+
+net k2.program store_k2.program ui_prog.k2_program ui_run.k2_program
+net k2.actual_program store_k2.actual_program => ui_prog.k2_actual_program
+setp progtime_k2.scale 0.000277777777778
+net k2.time progtime_k2.elapsed curve_k2.in ui_mon.k2_elapsed ui_run.k2_elapsed
+net k2.sp-raw curve_k2.out => progtime_k2.cmd-in
+net k2.sp-lim progtime_k2.cmd-out => lim_k2.in
+net k2.max-diff progtime_k2.max-diff
+net k2.max-ferr progtime_k2.max-ferr
+sets k2.max-diff 50
+sets k2.max-ferr 3
+setp lim_k2.min 0
+setp lim_k2.max 1100
+# setp lim_k2.maxv 1000
+
+net k2.start ui_run.k2_start => progtime_k2.start
+net k2.run progtime_k2.runs => hal_atr620.k2.run ui_run.k2_runs ui_mon.k2_runs ui_prog.k2_runs
+net k2.stay ui_run.k2_stay => progtime_k2.stay
+net k2.stop ui_run.k2_stop => progtime_k2.stop
+net k2.waiting progtime_k2.waiting => ui_run.k2_waiting
+
+net k2.ok hal_atr620.k2.ok => ui_mon.k2_comm_ok ui_run.k2_comm_ok
+net k2.pv1 hal_atr620.k2.pv1 => progtime_k2.pv1 ui_mon.k2_pv1 ui_run.k2_pv1
+net k2.pv2 hal_atr620.k2.pv2 => progtime_k2.pv2 ui_mon.k2_pv2 ui_run.k2_pv2
+net k2.op1 hal_atr620.k2.op1 => ui_mon.k2_op1
+net k2.op2 hal_atr620.k2.op2 => ui_mon.k2_op2
+net k2.ser-sp lim_k2.out => hal_atr620.k2.ser-sp ui_run.k2_sp ui_mon.k2_sp
+
+loadusr -Wn halsampler_k2 halsampler -N halsampler_k2 -c 1 -t k2_samples.csv
+net k2.run sampler.1.enable
+net k2.ok sampler.1.pin.0
+net k2.pv1 sampler.1.pin.1
+net k2.pv2 sampler.1.pin.2
+net k2.op1 sampler.1.pin.3
+net k2.op2 sampler.1.pin.4
+net k2.ser-sp sampler.1.pin.5
+addf sampler.1 thread
+
+# === Kiln k3 ===
+loadusr -Wn store_k3 ./hal_store.py -n store_k3 -f k3store.ini -i 10
+newinst progtime progtime_k3
+newinst limit2 lim_k3
+
+addf progtime_k3 thread
+addf curve_k3 thread
+addf lim_k3 thread
+
+newpin ui_prog ui_prog.k3_dx0 float io
+newpin ui_prog ui_prog.k3_dx1 float io
+newpin ui_prog ui_prog.k3_dx2 float io
+newpin ui_prog ui_prog.k3_dx3 float io
+newpin ui_prog ui_prog.k3_dx4 float io
+newpin ui_prog ui_prog.k3_dx5 float io
+newpin ui_prog ui_prog.k3_dx6 float io
+newpin ui_prog ui_prog.k3_dx7 float io
+newpin ui_prog ui_prog.k3_dx8 float io
+newpin ui_prog ui_prog.k3_dx9 float io
+
+newpin ui_prog ui_prog.k3_y1 float io
+newpin ui_prog ui_prog.k3_y2 float io
+newpin ui_prog ui_prog.k3_y3 float io
+newpin ui_prog ui_prog.k3_y4 float io
+newpin ui_prog ui_prog.k3_y5 float io
+newpin ui_prog ui_prog.k3_y6 float io
+newpin ui_prog ui_prog.k3_y7 float io
+newpin ui_prog ui_prog.k3_y8 float io
+newpin ui_prog ui_prog.k3_y9 float io
+newpin ui_prog ui_prog.k3_y10 float io
+
+newpin ui_prog ui_prog.k3_program u32 io
+newpin ui_prog ui_prog.k3_actual_program u32 in
+newpin ui_prog ui_prog.k3_runs bit in
+
+newpin ui_run ui_run.k3_comm_ok bit in
+newpin ui_run ui_run.k3_program u32 io
+newpin ui_run ui_run.k3_start bit out
+newpin ui_run ui_run.k3_runs bit in
+newpin ui_run ui_run.k3_stay bit out
+newpin ui_run ui_run.k3_stop bit out
+newpin ui_run ui_run.k3_waiting bit in
+newpin ui_run ui_run.k3_sp float in
+newpin ui_run ui_run.k3_pv1 float in
+newpin ui_run ui_run.k3_pv2 float in
+newpin ui_run ui_run.k3_elapsed float io
+newpin ui_run ui_run.k3_duration float in
+
+newpin ui_mon ui_mon.k3_comm_ok bit in
+newpin ui_mon ui_mon.k3_runs bit in
+newpin ui_mon ui_mon.k3_pv1 float in
+newpin ui_mon ui_mon.k3_pv2 float in
+newpin ui_mon ui_mon.k3_sp float in
+newpin ui_mon ui_mon.k3_op1 float in
+newpin ui_mon ui_mon.k3_op2 float in
+newpin ui_mon ui_mon.k3_elapsed float in
+newpin ui_mon ui_mon.k3_duration float in
+
+net k3.dx0 store_k3.dx0 ui_prog.k3_dx0 curve_k3.dx-00
+net k3.dx1 store_k3.dx1 ui_prog.k3_dx1 curve_k3.dx-01
+net k3.dx2 store_k3.dx2 ui_prog.k3_dx2 curve_k3.dx-02
+net k3.dx3 store_k3.dx3 ui_prog.k3_dx3 curve_k3.dx-03
+net k3.dx4 store_k3.dx4 ui_prog.k3_dx4 curve_k3.dx-04
+net k3.dx5 store_k3.dx5 ui_prog.k3_dx5 curve_k3.dx-05
+net k3.dx6 store_k3.dx6 ui_prog.k3_dx6 curve_k3.dx-06
+net k3.dx7 store_k3.dx7 ui_prog.k3_dx7 curve_k3.dx-07
+net k3.dx8 store_k3.dx8 ui_prog.k3_dx8 curve_k3.dx-08
+net k3.dx9 store_k3.dx9 ui_prog.k3_dx9 curve_k3.dx-09
+
+net k3.duration curve_k3.x-max => progtime_k3.duration ui_mon.k3_duration ui_run.k3_duration
+
+net k3.y00 progtime_k3.pv-at-start curve_k3.y-00
+net k3.y01 store_k3.y1 ui_prog.k3_y1 curve_k3.y-01
+net k3.y02 store_k3.y2 ui_prog.k3_y2 curve_k3.y-02
+net k3.y03 store_k3.y3 ui_prog.k3_y3 curve_k3.y-03
+net k3.y04 store_k3.y4 ui_prog.k3_y4 curve_k3.y-04
+net k3.y05 store_k3.y5 ui_prog.k3_y5 curve_k3.y-05
+net k3.y06 store_k3.y6 ui_prog.k3_y6 curve_k3.y-06
+net k3.y07 store_k3.y7 ui_prog.k3_y7 curve_k3.y-07
+net k3.y08 store_k3.y8 ui_prog.k3_y8 curve_k3.y-08
+net k3.y09 store_k3.y9 ui_prog.k3_y9 curve_k3.y-09
+net k3.y10 store_k3.y10 ui_prog.k3_y10 curve_k3.y-10
+
+net k3.program store_k3.program ui_prog.k3_program ui_run.k3_program
+net k3.actual_program store_k3.actual_program => ui_prog.k3_actual_program
+setp progtime_k3.scale 0.000277777777778
+net k3.time progtime_k3.elapsed curve_k3.in ui_mon.k3_elapsed ui_run.k3_elapsed
+net k3.sp-raw curve_k3.out => progtime_k3.cmd-in
+net k3.sp-lim progtime_k3.cmd-out => lim_k3.in
+net k3.max-diff progtime_k3.max-diff
+net k3.max-ferr progtime_k3.max-ferr
+sets k3.max-diff 50
+sets k3.max-ferr 3
+setp lim_k3.min 0
+setp lim_k3.max 1100
+# setp lim_k3.maxv 1000
+
+net k3.start ui_run.k3_start => progtime_k3.start
+net k3.run progtime_k3.runs => hal_atr620.k3.run ui_run.k3_runs ui_mon.k3_runs ui_prog.k3_runs
+net k3.stay ui_run.k3_stay => progtime_k3.stay
+net k3.stop ui_run.k3_stop => progtime_k3.stop
+net k3.waiting progtime_k3.waiting => ui_run.k3_waiting
+
+net k3.ok hal_atr620.k3.ok => ui_mon.k3_comm_ok ui_run.k3_comm_ok
+net k3.pv1 hal_atr620.k3.pv1 => progtime_k3.pv1 ui_mon.k3_pv1 ui_run.k3_pv1 progtime_k3.pv2 ui_mon.k3_pv2 ui_run.k3_pv2 # NOTE: only one sensor on K3 !!!
+# net k3.pv1 hal_atr620.k3.pv1 => progtime_k3.pv1 ui_mon.k3_pv1 ui_run.k3_pv1 # NOTE: only one sensor on K3 !!!
+# net k3.pv2 hal_atr620.k3.pv2 => progtime_k3.pv2 ui_mon.k3_pv2 ui_run.k3_pv2 # NOTE: only one sensor on K3 !!!
+net k3.op1 hal_atr620.k3.op1 => ui_mon.k3_op1
+net k3.op2 hal_atr620.k3.op2 => ui_mon.k3_op2
+net k3.ser-sp lim_k3.out => hal_atr620.k3.ser-sp ui_run.k3_sp ui_mon.k3_sp
+
+loadusr -Wn halsampler_k3 halsampler -N halsampler_k3 -c 2 -t k3_samples.csv
+net k3.run sampler.2.enable
+net k3.ok sampler.2.pin.0
+net k3.pv1 sampler.2.pin.1
+net k3.pv2 sampler.2.pin.2
+net k3.op1 sampler.2.pin.3
+net k3.op2 sampler.2.pin.4
+net k3.ser-sp sampler.2.pin.5
+addf sampler.2 thread
+
+# ===  ===
+
+# Almost identical above ^^^
+
+ready ui_prog
+ready ui_run
+ready ui_mon
+
+loadusr haltalk
+start

@@ -1,0 +1,12 @@
+[Unit]
+Description=mklauncher service
+After=syslog.target network.target
+; ap-hotspot.service
+[Service]
+Type=simple
+; TODO: unify ExecStart string
+ExecStart=/usr/bin/mklauncher /home/machinekit/machinekit/configs/autorun/
+User=machinekit
+LimitMEMLOCK=33554432
+[Install]
+WantedBy=multi-user.target

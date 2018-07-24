@@ -1,0 +1,50 @@
+component progtime "Program time helper component";
+pin in bit start;
+pin in bit stop;
+pin in bit stay;
+pin out bit runs;
+pin out bit waiting;
+pin in float pv1 = -2000;
+pin in float pv2 = 2000;
+pin out float pv-at-start;
+pin in float cmd-in;
+pin out float cmd-out;
+pin io float cmd-out-when-off = 0;
+pin io float elapsed = 0.0; // TODO: test function "continue from user-chosen time"
+pin in float duration;
+pin in float scale = 0.000277777777778;
+pin in float max-diff = 50;
+pin in float max-ferr = 30;
+
+// TODO:
+// stop, stay (pause with cmd-out=cmd-in), wait to reach, wait to even gap of two pv
+// continue from user-chosen time
+
+variable hal_bit_t last_start;
+// variable hal_bit_t last_runs;
+function _ fp;
+
+author "Marius Alksnys";
+license "GPL";
+;;
+#include "rtapi_math.h"
+FUNCTION(_)
+{
+    if (start && !last_start && !runs && !stop && !stay) {
+        runs = true;
+        elapsed = 0.0;
+        pv_at_start = (pv1 + pv2) / 2;
+    }
+    if (runs) {
+        waiting = (rtapi_fabs(pv1 - pv2) > max_diff)
+            || (rtapi_fabs(pv1 - cmd_in) > max_ferr)
+            || (rtapi_fabs(pv2 - cmd_in) > max_ferr);
+        if (!stay && !waiting) elapsed = elapsed + scale * fperiod;
+                
+        cmd_out = cmd_in;
+        if (stop || elapsed >= duration) runs = waiting = false;
+    }
+    else cmd_out = cmd_out_when_off;
+    last_start = start;
+return 0;
+}

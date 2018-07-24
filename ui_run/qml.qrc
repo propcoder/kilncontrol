@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>ui_run/ui_run.qml</file>
+        <file>ui_run/description.ini</file>
+    </qresource>
+</RCC>

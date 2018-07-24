@@ -1,0 +1,14 @@
+[Unit]
+Description=Pings VPN server periodically and restarts networking when off
+After=syslog.target network.target
+; ap-hotspot.service
+[Service]
+Type=simple
+; TODO: unify ExecStart string
+ExecStart=/bin/bash /home/machinekit/machinekit/configs/autorun/stayalive.sh
+Restart=always
+RestartSec=30
+User=root
+LimitMEMLOCK=33554432
+[Install]
+WantedBy=multi-user.target

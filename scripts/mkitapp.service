@@ -1,0 +1,12 @@
+[Unit]
+Description=Starts Machinekit application configuration
+After=syslog.target mklauncher.service
+; network.target ap-hotspot.service
+[Service]
+Type=simple
+; TODO: unify ExecStart string
+ExecStart=/usr/bin/python /home/machinekit/machinekit/configs/autorun/run.py
+User=machinekit
+LimitMEMLOCK=33554432
+[Install]
+WantedBy=multi-user.target

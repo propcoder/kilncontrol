@@ -1,0 +1,13 @@
+[Unit]
+Description=VNC Server for X11
+Requires=display-manager.service
+After=display-manager.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/x11vnc -auth guess -forever -shared -bg -display :0
+Restart=always
+User=machinekit
+
+[Install]
+WantedBy=multi-user.target

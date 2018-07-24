@@ -1,0 +1,13 @@
+[Unit]
+Description=Pings to server periodically to keep mobile internet connection on
+After=syslog.target network.target
+; ap-hotspot.service
+[Service]
+Type=simple
+; TODO: unify ExecStart string
+ExecStart=/usr/bin/ping -i 180 8.8.8.8
+Restart=always
+User=machinekit
+LimitMEMLOCK=33554432
+[Install]
+WantedBy=multi-user.target
